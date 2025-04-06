@@ -33,7 +33,7 @@ const SkyscannerClient = new Zodios('https://skyscanner89.p.rapidapi.com', [
                 name: 'date',
                 type: 'Query',
                 required: true,
-                schema: z.string(),
+                schema: z.string().date(),
             },
             {
                 name: 'origin',
@@ -69,6 +69,52 @@ const SkyscannerClient = new Zodios('https://skyscanner89.p.rapidapi.com', [
                         items: z.array(z.unknown()),
                     })),
                 }),
+            }),
+        }),
+    },
+    {
+        method: 'get',
+        path: '/hotels/auto-complete',
+        parameters: [
+            {
+                name: 'query',
+                type: 'Query',
+                required: true,
+                schema: z.string(),
+            },
+        ],
+        response: z.array(z.unknown()),
+    },
+    {
+        method: 'get',
+        path: '/hotels/list',
+        parameters: [
+            {
+                name: 'entity_id',
+                type: 'Query',
+                required: true,
+                schema: z.string(),
+            },
+            {
+                name: 'checkin',
+                type: 'Query',
+                required: true,
+                schema: z.string().date(),
+            },
+            {
+                name: 'checkout',
+                type: 'Query',
+                required: true,
+                schema: z.string().date(),
+            },
+        ],
+        response: z.object({
+            results: z.object({
+                hotelCards: z.array(z.object({
+                    name: z.string(),
+                    cheapestPrice: z.string(),
+                    stars: z.string(),
+                })),
             }),
         }),
     },

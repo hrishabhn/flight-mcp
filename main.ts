@@ -59,6 +59,38 @@ server.addTool({
 })
 
 server.addTool({
+    name: 'hotelsAutoComplete',
+    description: [
+        'Get hotel places from the given query.',
+        'The hotel data will contain a place class, entityName, and entityId.',
+    ].join('\n'),
+    parameters: z.object({
+        query: z.string().describe('Place name'),
+    }),
+    execute: async ({ query }) => {
+        const data = await SkyscannerClient.get('/hotels/auto-complete', { queries: { query } })
+        return JSON.stringify(data, null, 2)
+    },
+})
+
+server.addTool({
+    name: 'hotelsList',
+    description: [
+        'Get hotel data from the given query.',
+        'Present the results in tabular format.',
+    ].join('\n'),
+    parameters: z.object({
+        entity_id: z.string().describe('Can be retrieved from hotels/auto-complete endpoint (data -> entityId)'),
+        checkin: z.string().date().describe('Check-in date'),
+        checkout: z.string().date().describe('Check-out date'),
+    }),
+    execute: async ({ entity_id, checkin, checkout }) => {
+        const data = await SkyscannerClient.get('/hotels/list', { queries: { entity_id, checkin, checkout } })
+        return JSON.stringify(data, null, 2)
+    },
+})
+
+server.addTool({
     name: 'checkAvailability',
     description: [
         'Check availability for the given time period.',
