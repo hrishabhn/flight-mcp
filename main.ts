@@ -40,7 +40,7 @@ server.addTool({
 server.addTool({
     name: 'flightsOneWay',
     description: [
-        'Get one way flight data from the given query.',
+        'Get one-way flight data from the given query.',
         'Present the results in tabular format.',
     ].join('\n'),
     parameters: z.object({
