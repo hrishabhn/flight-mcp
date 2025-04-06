@@ -2,8 +2,10 @@ import dayjs from 'npm:dayjs'
 import { google } from 'npm:googleapis'
 
 // init environment variables
-const credentials = JSON.parse(Deno.env.get('GOOGLE_SERVICE_KEY')!)
-if (!credentials) throw new Error('GOOGLE_SERVICE_KEY is not set')
+const credentialsJson = Deno.env.get('GOOGLE_SERVICE_KEY')
+if (!credentialsJson) throw new Error('GOOGLE_SERVICE_KEY is not set')
+const credentials = JSON.parse(credentialsJson)
+
 const calendarId = Deno.env.get('GOOGLE_CALENDAR_ID')
 if (!calendarId) throw new Error('GOOGLE_CALENDAR_ID is not set')
 
