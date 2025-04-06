@@ -35,7 +35,7 @@ server.addTool({
     }),
     execute: async ({ query }) => {
         const data = await SkyscannerClient.get('/flights/auto-complete', { queries: { query } })
-        return JSON.stringify(data.inputSuggest.map((item) => item.navigation.relevantFlightParams), null, 2)
+        return JSON.stringify(data.inputSuggest.map((item) => item.navigation.relevantFlightParams))
     },
 })
 
@@ -54,7 +54,7 @@ server.addTool({
     }),
     execute: async ({ date, origin, originId, destination, destinationId }) => {
         const data = await SkyscannerClient.get('/flights/one-way/list', { queries: { date, origin, originId, destination, destinationId } })
-        return JSON.stringify(data.data.itineraries.buckets, null, 2)
+        return JSON.stringify(data.data.itineraries.buckets)
     },
 })
 
@@ -69,7 +69,7 @@ server.addTool({
     }),
     execute: async ({ query }) => {
         const data = await SkyscannerClient.get('/hotels/auto-complete', { queries: { query } })
-        return JSON.stringify(data, null, 2)
+        return JSON.stringify(data)
     },
 })
 
@@ -86,7 +86,7 @@ server.addTool({
     }),
     execute: async ({ entity_id, checkin, checkout }) => {
         const data = await SkyscannerClient.get('/hotels/list', { queries: { entity_id, checkin, checkout } })
-        return JSON.stringify(data, null, 2)
+        return JSON.stringify(data)
     },
 })
 
@@ -109,7 +109,7 @@ server.addTool({
     }),
     execute: async ({ start, end }) => {
         const data = await GoogleCalendar.GetAvailability({ timeMin: parseLocalDate(start).dateTime, timeMax: parseLocalDate(end).dateTime })
-        return JSON.stringify(data, null, 2)
+        return JSON.stringify(data)
     },
 })
 
@@ -132,7 +132,7 @@ server.addTool({
     }),
     execute: async ({ summary, description, start, end }) => {
         const data = await GoogleCalendar.CreateEvent({ summary, description, start: parseLocalDate(start), end: parseLocalDate(end) })
-        return JSON.stringify(data, null, 2)
+        return JSON.stringify(data)
     },
 })
 

@@ -66,7 +66,13 @@ const SkyscannerClient = new Zodios('https://skyscanner89.p.rapidapi.com', [
                 itineraries: z.object({
                     buckets: z.array(z.object({
                         id: z.string(),
-                        items: z.array(z.unknown()),
+                        items: z.array(z.object({
+                            score: z.number(),
+                            price: z.object({
+                                formatted: z.string(),
+                            }),
+                            legs: z.array(z.unknown()),
+                        })),
                     })),
                 }),
             }),
