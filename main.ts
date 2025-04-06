@@ -9,6 +9,17 @@ const server = new FastMCP({
 })
 
 server.addTool({
+    name: 'getDate',
+    description: [
+        'Get the current date.',
+        'Use this to get the current date if the user has not specified the year of travel.',
+    ].join('\n'),
+    parameters: z.object({}),
+    // deno-lint-ignore require-await
+    execute: async () => new Date().toISOString(),
+})
+
+server.addTool({
     name: 'flightsAutoComplete',
     description: [
         'Get airport data from the given query.',
