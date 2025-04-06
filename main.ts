@@ -1,5 +1,6 @@
-import { GoogleCalendar } from './src/calendar.ts'
 import { SkyscannerClient } from './src/skyscanner.ts'
+import { GoogleCalendar } from './src/calendar.ts'
+import { DateTimeWithTimezone } from './src/schema.ts'
 
 import { FastMCP } from 'npm:fastmcp'
 import { z } from 'npm:zod'
@@ -60,15 +61,15 @@ server.addTool({
 server.addTool({
     name: 'checkAvailability',
     description: [
-        'Check availability for the given date.',
-        'The date should be in the format YYYY-MM-DD.',
-        'The date should be in the future.',
+        'Check availability for the given time period.',
+        'The start should be the start of the first leg and the end should be the end of the last leg.',
     ].join('\n'),
     parameters: z.object({
-        date: z.string().date().describe('Date to check availability for'),
+        start: DateTimeWithTimezone.describe('Start dateTime of the first segment'),
+        end: DateTimeWithTimezone.describe('End dateTime of the last segment'),
     }),
-    execute: async ({ date }) => {
-        const data = await GoogleCalendar.GetAvailabilityForDay({ date })
+    execute: async ({ start, end }) => {
+        const data = await GoogleCalendar.GetAvailability({ timeMin: start.dateTime, timeMax: end.dateTime })
         return JSON.stringify(data, null, 2)
     },
 })
@@ -80,9 +81,9 @@ server.addTool({
     ].join('\n'),
     parameters: z.object({
         summary: z.string().describe("Flight details in the format: 'CX 321 - HKG to BCN'"),
-        description: z.string().describe('Additional details about the flight'),
-        start: z.string().date().describe('Start dateTime of the event in ISO 8601 format'),
-        end: z.string().date().describe('End dateTime of the event in ISO 8601 format'),
+        description: z.string().describe('Additional details about the flight such as leg number'),
+        start: DateTimeWithTimezone.describe('Start dateTime of the flight'),
+        end: DateTimeWithTimezone.describe('End dateTime of the flight'),
     }),
     execute: async ({ summary, description, start, end }) => {
         const data = await GoogleCalendar.CreateEvent({ summary, description, start, end })

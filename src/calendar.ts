@@ -1,4 +1,3 @@
-import dayjs from 'npm:dayjs'
 import { google } from 'npm:googleapis'
 
 // init environment variables
@@ -13,19 +12,15 @@ if (!calendarId) throw new Error('GOOGLE_CALENDAR_ID is not set')
 const serviceAccount = new google.auth.GoogleAuth({ credentials, scopes: ['https://www.googleapis.com/auth/calendar'] })
 google.options({ auth: serviceAccount })
 
-export class GoogleCalendar {
-    static GetAvailabilityForDay = async ({ date }: { date: string }) => {
-        const data = await google.calendar('v3').events.list({
-            calendarId,
-            timeMin: dayjs(date).startOf('day').subtract(1, 'day').toISOString(),
-            timeMax: dayjs(date).endOf('day').add(1, 'day').toISOString(),
-        })
+type EventTime = {
+    dateTime: string
+    timeZone: string
+}
 
-        return data.data.items?.map((event) => ({
-            title: event.summary,
-            start: event.start?.dateTime,
-            end: event.end?.dateTime,
-        })) || []
+export class GoogleCalendar {
+    static GetAvailability = async ({ timeMin, timeMax }: { timeMin: string; timeMax: string }): Promise<{ available: boolean }> => {
+        const { data } = await google.calendar('v3').events.list({ calendarId, timeMin, timeMax })
+        return { available: !data.items?.length }
     }
 
     static CreateEvent = async ({
@@ -36,17 +31,12 @@ export class GoogleCalendar {
     }: {
         summary: string
         description: string
-        start: string
-        end: string
+        start: EventTime
+        end: EventTime
     }) => {
         const { data } = await google.calendar('v3').events.insert({
             calendarId,
-            requestBody: {
-                summary,
-                description,
-                start: { dateTime: start },
-                end: { dateTime: end },
-            },
+            requestBody: { summary, description, start, end },
         })
 
         return data
