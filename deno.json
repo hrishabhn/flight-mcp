@@ -1,5 +1,6 @@
 {
     "tasks": {
+        "inspect": "pnpm dlx @modelcontextprotocol/inspector",
         "dev": "deno run --allow-env --env-file --allow-read --allow-net --watch main.ts",
         "start": "deno run --allow-env --env-file --allow-read --allow-net main.ts"
     },

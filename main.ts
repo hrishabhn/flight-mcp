@@ -1,4 +1,5 @@
-import { SkyscannerClient } from './src/client.ts'
+import { GoogleCalendar } from './src/calendar.ts'
+import { SkyscannerClient } from './src/skyscanner.ts'
 
 import { FastMCP } from 'npm:fastmcp'
 import { z } from 'npm:zod'
@@ -53,6 +54,39 @@ server.addTool({
     execute: async ({ date, origin, originId, destination, destinationId }) => {
         const data = await SkyscannerClient.get('/flights/one-way/list', { queries: { date, origin, originId, destination, destinationId } })
         return JSON.stringify(data.data.itineraries.buckets, null, 2)
+    },
+})
+
+server.addTool({
+    name: 'checkAvailability',
+    description: [
+        'Check availability for the given date.',
+        'The date should be in the format YYYY-MM-DD.',
+        'The date should be in the future.',
+    ].join('\n'),
+    parameters: z.object({
+        date: z.string().date().describe('Date to check availability for'),
+    }),
+    execute: async ({ date }) => {
+        const data = await GoogleCalendar.GetAvailabilityForDay({ date })
+        return JSON.stringify(data, null, 2)
+    },
+})
+
+server.addTool({
+    name: 'addFlightToCalendar',
+    description: [
+        'Add a flight to the calendar.',
+    ].join('\n'),
+    parameters: z.object({
+        summary: z.string().describe("Flight details in the format: 'CX 321 - HKG to BCN'"),
+        description: z.string().describe('Additional details about the flight'),
+        start: z.string().date().describe('Start dateTime of the event in ISO 8601 format'),
+        end: z.string().date().describe('End dateTime of the event in ISO 8601 format'),
+    }),
+    execute: async ({ summary, description, start, end }) => {
+        const data = await GoogleCalendar.CreateEvent({ summary, description, start, end })
+        return JSON.stringify(data, null, 2)
     },
 })
 
