@@ -1,6 +1,6 @@
 import { SkyscannerClient } from './src/skyscanner.ts'
 import { GoogleCalendar } from './src/calendar.ts'
-import { DateTimeWithTimezone } from './src/schema.ts'
+import { parseLocalDate } from './src/util.ts'
 
 import { FastMCP } from 'npm:fastmcp'
 import { z } from 'npm:zod'
@@ -62,14 +62,21 @@ server.addTool({
     name: 'checkAvailability',
     description: [
         'Check availability for the given time period.',
-        'The start should be the start of the first leg and the end should be the end of the last leg.',
+        'The start should be the start of the first segment of the journey.',
+        'The end should be the end of the last segment of the journey.',
     ].join('\n'),
     parameters: z.object({
-        start: DateTimeWithTimezone.describe('Start dateTime of the first segment'),
-        end: DateTimeWithTimezone.describe('End dateTime of the last segment'),
+        start: z.object({
+            dateTime: z.string().describe('Start dateTime of the first segment in ISO 8601 format, local event time, without time zone or offset'),
+            timeZone: z.string().describe('Time zone of the first segment departure, use the airport time zone in the tz format'),
+        }),
+        end: z.object({
+            dateTime: z.string().describe('End dateTime of the last segment in ISO 8601 format, local event time, without time zone or offset'),
+            timeZone: z.string().describe('Time zone of the last segment arrival, use the airport time zone in the tz format'),
+        }),
     }),
     execute: async ({ start, end }) => {
-        const data = await GoogleCalendar.GetAvailability({ timeMin: start.dateTime, timeMax: end.dateTime })
+        const data = await GoogleCalendar.GetAvailability({ timeMin: parseLocalDate(start).dateTime, timeMax: parseLocalDate(end).dateTime })
         return JSON.stringify(data, null, 2)
     },
 })
@@ -82,11 +89,17 @@ server.addTool({
     parameters: z.object({
         summary: z.string().describe("Flight details in the format: 'CX 321 - HKG to BCN'"),
         description: z.string().describe('Additional details about the flight such as leg number'),
-        start: DateTimeWithTimezone.describe('Start dateTime of the flight'),
-        end: DateTimeWithTimezone.describe('End dateTime of the flight'),
+        start: z.object({
+            dateTime: z.string().describe('Start dateTime of the event in ISO 8601 format, local event time, without time zone or offset'),
+            timeZone: z.string().describe('Time zone of the flight departure, use the airport time zone in the tz format'),
+        }),
+        end: z.object({
+            dateTime: z.string().describe('End dateTime of the event in ISO 8601 format, local event time, without time zone or offset'),
+            timeZone: z.string().describe('Time zone of the flight arrival, use the airport time zone in the tz format'),
+        }),
     }),
     execute: async ({ summary, description, start, end }) => {
-        const data = await GoogleCalendar.CreateEvent({ summary, description, start, end })
+        const data = await GoogleCalendar.CreateEvent({ summary, description, start: parseLocalDate(start), end: parseLocalDate(end) })
         return JSON.stringify(data, null, 2)
     },
 })
